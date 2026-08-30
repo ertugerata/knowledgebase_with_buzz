@@ -1,0 +1,110 @@
+#!/bin/bash
+
+# Buzz Sistem Yönetim ve Başlatma Betiği
+# Bu betik, Docker Compose altyapısındaki Buzz servislerini (Hermes Agent, Buzz Relay,
+# Nextcloud, Qdrant, Caddy, Browserless, Postgres, Redis) yönetmeyi sağlar.
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+COMMAND="${1:-start}"
+
+show_help() {
+    echo "Buzz Sistem Yönetim Betiği"
+    echo ""
+    echo "Kullanım: ./buzz-start [komut]"
+    echo ""
+    echo "Komutlar:"
+    echo "  start       Sistemi başlatır (.env yoksa kurulum sihirbazını önerir)"
+    echo "  stop        Çalışan sistem servislerini durdurur"
+    echo "  restart     Servisleri yeniden başlatır"
+    echo "  status | ps Servislerin güncel durumunu gösterir"
+    echo "  logs [srv]  Servis loglarını canlı izler (örn: ./buzz-start logs hermes)"
+    echo "  wizard      İnteraktif kurulum sihirbazını çalıştırır"
+    echo "  down        Servisleri durdurur ve konteynerleri kaldırır"
+    echo "  help        Bu yardım mesajını görüntüler"
+    echo ""
+}
+
+case "$COMMAND" in
+    start)
+        if [ ! -f ".env" ]; then
+            echo "⚠️  .env dosyası bulunamadı!"
+            read -rp "Kurulum sihirbazını şimdi çalıştırmak ister misiniz? (Y/n): " run_wiz
+            run_wiz=${run_wiz:-Y}
+            if [[ "$run_wiz" =~ ^[Yy]$ ]]; then
+                bash scripts/setup-wizard.sh
+                exit 0
+            else
+                if [ -f "env-sample.txt" ]; then
+                    echo "ℹ️  env-sample.txt dosyası .env olarak kopyalanıyor..."
+                    cp env-sample.txt .env
+                    echo "⚠️ Lütfen .env dosyasını kendi API anahtarlarınız ve şifrelerinizle güncelleyin!"
+                else
+                    echo "❌ HATA: env-sample.txt bulunamadı."
+                    exit 1
+                fi
+            fi
+        fi
+
+        echo "🚀 Buzz ve Hermes servisleri başlatılıyor..."
+        docker compose up -d
+        echo ""
+        echo "=========================================="
+        echo "🎉 Buzz sistemi başarıyla başlatıldı!"
+        echo "=========================================="
+        echo "📌 Servis Durumları:"
+        docker compose ps
+        ;;
+
+    stop)
+        echo "🛑 Buzz servisleri durduruluyor..."
+        docker compose stop
+        echo "✔ Servisler durduruldu."
+        ;;
+
+    restart)
+        echo "🔄 Buzz servisleri yeniden başlatılıyor..."
+        docker compose restart
+        echo "✔ Servisler yeniden başlatıldı."
+        ;;
+
+    status|ps)
+        echo "📌 Servis Durumları:"
+        docker compose ps
+        ;;
+
+    logs)
+        SERVICE="${2:-}"
+        if [ -n "$SERVICE" ]; then
+            echo "📜 $SERVICE servisi logları izleniyor... (Çıkış için Ctrl+C)"
+            docker compose logs -f "$SERVICE"
+        else
+            echo "📜 Tüm servis logları izleniyor... (Çıkış için Ctrl+C)"
+            docker compose logs -f
+        fi
+        ;;
+
+    wizard|setup)
+        bash scripts/setup-wizard.sh
+        ;;
+
+    down)
+        echo "🗑️ Buzz servisleri durduruluyor ve konteynerler kaldırılıyor..."
+        docker compose down
+        echo "✔ İşlem tamamlandı."
+        ;;
+
+    help|-h|--help)
+        show_help
+        ;;
+
+    *)
+        echo "❌ Geçersiz komut: $COMMAND"
+        echo ""
+        show_help
+        exit 1
+        ;;
+esac
