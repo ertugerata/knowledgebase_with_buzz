@@ -1,0 +1,7 @@
+{$DOMAIN_NAME} {
+    reverse_proxy nextcloud-app:80
+
+    handle /relay* {
+        reverse_proxy buzz-relay:3000
+    }
+}
