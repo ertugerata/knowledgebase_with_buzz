@@ -111,7 +111,7 @@ services:
 
   # --- NEXTCLOUD (WEBDAV & STORAGE) ---
   nextcloud:
-    image: nextcloud:33.0.8-fpm-alpine
+    image: nextcloud:33.0.8-apache
     container_name: nextcloud-app
     restart: unless-stopped
     volumes:

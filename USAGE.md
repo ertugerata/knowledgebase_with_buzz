@@ -56,11 +56,21 @@ Sistemde web trafiği ve SSL yönetimi `caddy:2-alpine` imajı ile sağlanır. `
 
 ### 📄 `Caddyfile` İçeriği:
 ```caddy
-{$DOMAIN_NAME} {
-    reverse_proxy nextcloud-app:80
+{$DOMAIN_NAME:localhost} {
+    # Nextcloud client ve takvim/rehber senkronizasyonu yönlendirmeleri (.well-known)
+    redir /.well-known/carddav /remote.php/dav/ 301
+    redir /.well-known/caldav /remote.php/dav/ 301
+    redir /.well-known/webfinger /index.php/.well-known/webfinger 301
+    redir /.well-known/nodeinfo /index.php/.well-known/nodeinfo 301
 
+    # Buzz Relay WebSocket ve HTTP trafiği yönlendirmesi
     handle /relay* {
         reverse_proxy buzz-relay:3000
+    }
+
+    # Nextcloud ana uygulama yönlendirmesi
+    handle {
+        reverse_proxy nextcloud-app:80
     }
 }
 ```
