@@ -48,7 +48,7 @@ services:
 
   # --- BUZZ CORE SERVICES ---
   buzz-relay:
-    image: block/buzz-relay:latest
+    image: ghcr.io/block/buzz:latest
     container_name: buzz-relay
     restart: unless-stopped
     environment:
