@@ -1,6 +1,6 @@
 # 🐝 Buzz & Hermes Sistem Detaylı Kullanım Kılavuzu (USAGE.md)
 
-Bu kılavuz, **Buzz & Hermes Agent** ekosisteminin kurulumunu, yapılandırmasını, servis bağımlılıklarını, ters vekil (Caddy) ayarlarını, Model Context Protocol (MCP) entegrasyonlarını, vektör hafıza (Qdrant) kullanımını ve sorun giderme adımlarını kapsamlı bir şekilde sunmaktadır.
+Bu kılavuz, **Buzz & Hermes Agent** ekosisteminin kurulumunu, yapılandırmasını, servis bağımlılıklarını, ters vekil (Caddy) ayarlarını, Model Context Protocol (MCP) entegrasyonlarını, vektör hafıza (Qdrant) kullanımını, günlük dosya ve bilgi tabanı kullanımını, mobil/masaüstü erişim adımlarını ve sorun giderme adımlarını kapsamlı bir şekilde sunmaktadır.
 
 ---
 
@@ -117,7 +117,94 @@ Hermes Agent, uzun süreli hafıza ve bilgi tabanı dosyalarını Nextcloud üze
 
 ---
 
-## 🔍 6. Sorun Giderme ve Teşhis (Troubleshooting)
+## 📂 6. Klasör Yapısı ve Düzen
+
+Nextcloud üzerinde varsayılan olarak tanımlanan dosya ve raf mimarisi şu şekildedir:
+
+```text
+📁 Bilgi_Tabani/ (Ana Dizin)
+├── 📁 01_Haftalik_Web_Takip/  --> Hermes'in dinamik sitelerden haftalık kazıdığı raporlar.
+├── 📁 02_Okuma_Listesi/       --> Bilgisayar veya mobilden yüklediğiniz ham PDF / dökümanlar.
+└── 📁 03_Akilli_Raflar/        --> Konularına göre otomatik ayrışan arşiv klasörleri.
+    ├── 📁 #Yazilim/
+    ├── 📁 #Finans/
+    ├── 📁 #Saglik/
+    └── 📁 #Hukuk/
+```
+
+---
+
+## 📱 7. Döküman ve PDF Yükleme Yöntemleri
+
+Hermes Agent'ın PDF belgelerini okuyup akademik düzeyde Türkçe özet çıkarabilmesi ve ilgili akıllı rafa kategorize edebilmesi için belgelerin `02_Okuma_Listesi/` klasörüne yüklenmesi gerekir.
+
+| Platform | Yöntem | İşlem Adımları |
+| :--- | :--- | :--- |
+| **Masaüstü (Win / Mac / Linux)** | Nextcloud İstemcisi | Yerel `Bilgi_Tabani/02_Okuma_Listesi/` klasörüne sürükleyip bırakın. |
+| **Masaüstü (Tarayıcı)** | Nextcloud Web | Web arayüzünden `02_Okuma_Listesi/` dizinine girip Yükle butonunu kullanın. |
+| **Mobil (iOS / Android)** | Nextcloud Mobil App | Mobil cihazdaki PDF'i açıp **Paylaş > Nextcloud > 02_Okuma_Listesi** yolunu seçin. |
+| **Mobil (iOS / Android)** | Dosya Yöneticisi | Mobil dosya yöneticisine ekli Nextcloud sürücüsünden doğrudan klasöre taşıyın. |
+
+---
+
+## 🤖 8. Otomatik Arka Plan İş Akışları (Cron Jobs)
+
+Sistemde iki temel otomasyon senaryosu tanımlıdır:
+
+### 🔻 Senaryo A: PDF Analizi ve Akıllı Raf Transferi (Her Gece 23:00)
+- Hermes Agent saat 23:00'te `02_Okuma_Listesi/` dizinini kontrol eder.
+- Yeni eklenen PDF'leri derin araştırma modeli (Llama 3.3 70B) ile analiz eder.
+- İçeriğin akademik düzeyde Türkçe özetini hazırlar ve önemli çıkarımları listeler.
+- Dökümanın konusuna göre `03_Akilli_Raflar/` altında uygun klasörü seçer (yoksa oluşturur).
+- Orijinal PDF'i ve oluşturduğu `.md` uzantılı Türkçe özet raporunu bu akıllı rafa taşır.
+- İşlem tamamlandığında `02_Okuma_Listesi/` klasörünü temizler.
+
+### 🔻 Senaryo B: Dinamik Web Sayfası Takibi (Her Pazar 00:00)
+- Hermes Agent her Pazar gece yarısı 00:00'da Buzz kanalı üzerindeki `#web-takip-listesi` başlığındaki URL'leri tarar.
+- Sayfalardaki değişiklikleri veya yeni eklenen bilgileri tespit ettiğinde bir Derin Araştırma Raporu oluşturur.
+- Çıkan raporu `01_Haftalik_Web_Takip/` klasörüne o günün tarihiyle (örn: `haftalik-rapor-2026-08-30.md`) kaydeder.
+
+---
+
+## 📲 9. Cihazlardan Erişim ve Kullanım Senaryoları
+
+### 💬 9.1 Buzz Platformu (Nostr Protokolü)
+- **Mobil Web (PWA):** Tarayıcınızdan `https://buzz.domaininiz.com` adresine girip **Ana Ekrana Ekle** seçeneğini kullanabilirsiniz.
+- **Nostr İstemcileri:** iOS ve Android cihazlarda NIP-29 / NIP-42 destekli istemcilere (Primal, Amethyst, Damus vb.) `wss://buzz.domaininiz.com/relay` adresinizi ekleyebilirsiniz.
+- **Soru-Cevap & Etkileşim:** Buzz kanalı üzerinden Hermes'e doğrudan mesaj atarak arşivdeki dökümanlarınız hakkında soru sorabilirsiniz (Örn: *"Hermes, geçen hafta yüklediğim rapordaki maliyet tablolarını özetler misin?"*).
+
+### ☁️ 9.2 Nextcloud & WebDAV Entegrasyonu
+- **Resmî Mobil / Masaüstü Uygulaması:** Mobil ve masaüstü Nextcloud istemcileri ile tüm klasörlerinizi eşzamanlı tutabilirsiniz.
+- **WebDAV Dijital Kütüphane:** Zotero, Readdle Documents veya PDF Expert gibi uygulamalara aşağıdaki WebDAV bağlantısını ekleyebilirsiniz:
+  ```text
+  https://domaininiz.com/remote.php/dav/files/ADMIN_KULLANICI/Bilgi_Tabani/
+  ```
+
+---
+
+## 🔄 10. Google Drive Senkronizasyonu (İsteğe Bağlı)
+
+Google Drive üzerindeki belirli bir klasörün Nextcloud ile canlı senkronize kalması için sunucu tarafında `rclone` ve `cron` kullanılabilir:
+
+```bash
+# 1. Google Drive klasörünü Nextcloud dizinine senkronize etme
+rclone sync gdrive:HedefKlasor /mnt/storagebox/nextcloud_data/admin/files/Bilgi_Tabani/Google_Sync/
+
+# 2. Senkronizasyon sonrası Nextcloud dosya indeksini tarama
+docker exec -u www-data nextcloud-app php occ files:scan admin
+```
+
+---
+
+## 💡 11. Örnek Günlük Kullanım Senaryosu
+
+1. **Gün İçi:** Mobil telefonunuzda okuduğunuz bir araştırma veya teknik makaleyi (PDF) **Paylaş > Nextcloud > 02_Okuma_Listesi** klasörüne gönderin.
+2. **Gece (23:00):** Hermes arka planda çalışarak belgeyi analiz eder, Türkçe markdown özetini hazırlar ve her iki dosyayı `03_Akilli_Raflar/#Yazilim/` klasörüne taşır.
+3. **Ertesi Gün:** Nextcloud veya WebDAV okuyucunuz üzerinden 2 dakikada belgenin Türkçe özetini okuyabilir veya Buzz üzerinden Hermes'e detaylı sorular yöneltebilirsiniz.
+
+---
+
+## 🔍 12. Sorun Giderme ve Teşhis (Troubleshooting)
 
 ### ❓ 1. Servisler Başlamıyor veya Hata Veriyor
 - Port çatışması olup olmadığını kontrol edin (`80`, `443`, `6333`).
