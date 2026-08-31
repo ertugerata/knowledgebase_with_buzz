@@ -89,8 +89,8 @@ Hermes Agent, OpenRouter bulut LLM sağlayıcısını kullanarak yüksek akıl y
 - **Default Model:** `google/gemini-3.1-flash` (Hızlı yanıt ve genel görev icrası)
 - **Deep Research Model:** `meta-llama/llama-3.3-70b-instruct` (Karmaşık araştırmalar ve analizler)
 
-### 🔌 4.2 MCP Konfigürasyonu (`mcp_config.json`)
-Hermes Agent dış dünya ile etkileşimini `mcp_config.json` dosyası üzerinden sağlar:
+### 🔌 4.2 MCP Konfigürasyonu (`hermes/mcp_config.json`)
+Hermes Agent dış dünya ile etkileşimini `hermes/mcp_config.json` dosyası üzerinden sağlar:
 
 ```json
 {

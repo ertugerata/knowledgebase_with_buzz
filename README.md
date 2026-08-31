@@ -21,11 +21,13 @@ Sistem aşağıdaki mikroservislerden ve bileşenlerden oluşmaktadır:
 +--------v-------+                           +-------v--------+
 |   Nextcloud    |                           |   Buzz Relay   |
 | (WebDAV/Data)  |                           | (WebSocket/WS) |
+| (./nextcloud)  |                           |    (./buzz)    |
 +----------------+                           +-------+--------+
          ^                                           ^
          |                                           |
 +--------+-------------------------------------------+--------+
 |                       Hermes Agent                          |
+|                       (./hermes)                            |
 |  - OpenRouter LLM (Gemini 3.1 Flash / Llama 3.3 70B)       |
 |  - Qdrant Vector Memory Integration                         |
 |  - Browserless Scraping Desteği                            |
@@ -43,9 +45,9 @@ Sistem aşağıdaki mikroservislerden ve bileşenlerden oluşmaktadır:
 | Servis | Konteyner Adı | Port | Açıklama |
 | :--- | :--- | :--- | :--- |
 | **Caddy** | `buzz-caddy` | `80`, `443` | Otomatik SSL/TLS destekli HTTP/HTTPS Reverse Proxy. |
-| **Hermes Agent** | `hermes-agent` | Dahili | OpenRouter LLM, RAG hafıza ve MCP yetenekli yapay zeka ajanı. |
-| **Buzz Relay** | `buzz-relay` | `3000` (Dahili) | Güvenli WebSocket tabanlı ajan ve servis mesajlaşma omurgası. |
-| **Nextcloud** | `nextcloud-app` | `80` (Dahili) | WebDAV ve dosya/bilgi tabanı depolama servisi. |
+| **Hermes Agent** | `hermes-agent` | Dahili | OpenRouter LLM, RAG hafıza ve MCP yetenekli yapay zeka ajanı (`./hermes`). |
+| **Buzz Relay** | `buzz-relay` | `3000` (Dahili) | Güvenli WebSocket tabanlı ajan ve servis mesajlaşma omurgası (`./buzz`). |
+| **Nextcloud** | `nextcloud-app` | `80` (Dahili) | WebDAV ve dosya/bilgi tabanı depolama servisi (`./nextcloud`). |
 | **Qdrant** | `buzz-qdrant` | `6333` | Vektör arama ve RAG (Retrieval-Augmented Generation) hafızası. |
 | **Browserless** | `buzz-browserless` | `3000` (Dahili) | Headless Chrome/Chromium web scraping altyapısı. |
 | **PostgreSQL** | `buzz-postgres` | `5432` (Dahili) | Buzz ve Nextcloud için ilişkisel veritabanı. |

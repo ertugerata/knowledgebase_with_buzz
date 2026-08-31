@@ -20,6 +20,9 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./caddy_data:/data
+    depends_on:
+      - nextcloud
+      - buzz-relay
     networks:
       - buzz_network
 
@@ -48,7 +51,8 @@ services:
 
   # --- BUZZ CORE SERVICES ---
   buzz-relay:
-    image: ghcr.io/block/buzz:latest
+    build: ./buzz
+    image: buzz-relay:latest
     container_name: buzz-relay
     restart: unless-stopped
     environment:
@@ -56,6 +60,9 @@ services:
       - BUZZ_REQUIRE_AUTH_TOKEN=true
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/buzz
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+    depends_on:
+      - postgres
+      - redis
     networks:
       - buzz_network
 
@@ -84,11 +91,12 @@ services:
 
   # --- HERMES AGENT (OPENROUTER LLM) ---
   hermes:
-    image: nousresearch/hermes-agent:latest
+    build: ./hermes
+    image: hermes-agent:latest
     container_name: hermes-agent
     restart: unless-stopped
     volumes:
-      - ./mcp_config.json:/app/mcp_config.json
+      - ./hermes/mcp_config.json:/app/mcp_config.json
     environment:
       # OpenRouter Bulut Yapılandırması
       - LLM_PROVIDER=openrouter
@@ -106,12 +114,18 @@ services:
       - WEBDAV_ENDPOINT=http://nextcloud-app:80/remote.php/dav/files/${NEXTCLOUD_ADMIN_USER}/Bilgi_Tabani/
       - WEBDAV_USER=${NEXTCLOUD_ADMIN_USER}
       - WEBDAV_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
+    depends_on:
+      - buzz-relay
+      - nextcloud
+      - qdrant
+      - browserless
     networks:
       - buzz_network
 
   # --- NEXTCLOUD (WEBDAV & STORAGE) ---
   nextcloud:
-    image: nextcloud:33.0.8-apache
+    build: ./nextcloud
+    image: nextcloud-app:latest
     container_name: nextcloud-app
     restart: unless-stopped
     volumes:
@@ -126,5 +140,8 @@ services:
       - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
       - REDIS_HOST=redis
       - REDIS_HOST_PASSWORD=${REDIS_PASSWORD}
+    depends_on:
+      - postgres
+      - redis
     networks:
       - buzz_network
