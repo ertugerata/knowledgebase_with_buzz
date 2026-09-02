@@ -1,1 +1,6 @@
 .env
+caddy_data/
+postgres_data/*
+!postgres_data/.gitkeep
+nextcloud_data/*
+!nextcloud_data/.gitkeep

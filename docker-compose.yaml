@@ -3,10 +3,8 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
   redis_data:
   nextcloud_html:
-  nextcloud_data:
   qdrant_data: # Hafif vektör arama için yerel depolama
   minio_data:
 
@@ -153,7 +151,7 @@ services:
     container_name: buzz-postgres
     restart: unless-stopped
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -237,7 +235,7 @@ services:
     restart: unless-stopped
     volumes:
       - nextcloud_html:/var/www/html
-      - nextcloud_data:/var/www/html/data
+      - ./nextcloud_data:/var/www/html/data
       - ./nextcloud/hooks/pre-installation:/docker-entrypoint-hooks.d/pre-installation:ro
     environment:
       - POSTGRES_HOST=postgres

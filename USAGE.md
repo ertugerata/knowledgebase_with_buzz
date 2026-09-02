@@ -198,8 +198,8 @@ Sistemde iki temel otomasyon senaryosu tanımlıdır:
 Google Drive üzerindeki belirli bir klasörün Nextcloud ile canlı senkronize kalması için sunucu tarafında `rclone` ve `cron` kullanılabilir:
 
 ```bash
-# 1. Nextcloud veri birimi (volume) yolunu tespit etme
-NEXTCLOUD_DATA_PATH=$(docker volume inspect $(docker volume ls -q -f name=nextcloud_data) --format '{{.Mountpoint}}')
+# 1. Nextcloud veri klasörünün yolunu belirleme
+NEXTCLOUD_DATA_PATH="./nextcloud_data"
 
 # 2. Google Drive klasörünü Nextcloud dizinine senkronize etme
 rclone sync gdrive:HedefKlasor "${NEXTCLOUD_DATA_PATH}/admin/files/Bilgi_Tabani/Google_Sync/"
@@ -257,7 +257,7 @@ BUZZ_RELAY_PRIVATE_KEY must be set when BUZZ_REQUIRE_AUTH_TOKEN=true. A stable r
 - PostgreSQL birimini sıfırlayarak yeni şifreyle yeniden başlatmak için:
   ```bash
   ./buzz-start down
-  docker volume rm app_postgres_data postgres_data 2>/dev/null || true
+  rm -rf ./postgres_data/*
   ./buzz-start start
   ```
 
