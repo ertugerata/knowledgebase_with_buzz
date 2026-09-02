@@ -76,8 +76,10 @@ services:
     container_name: buzz-relay
     restart: unless-stopped
     environment:
-      - BUZZ_REQUIRE_RELAY_MEMBERSHIP=true
+      - BUZZ_AUTO_MIGRATE=true
+      - BUZZ_REQUIRE_RELAY_MEMBERSHIP=${BUZZ_REQUIRE_RELAY_MEMBERSHIP:-false}
       - BUZZ_REQUIRE_AUTH_TOKEN=true
+      - RELAY_OWNER_PUBKEY=${RELAY_OWNER_PUBKEY:-}
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/buzz
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
     healthcheck:
