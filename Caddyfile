@@ -1,4 +1,5 @@
-{$DOMAIN_NAME:localhost} {
+# Reusable proxy handlers
+(buzz_handlers) {
     # Nextcloud client ve takvim/rehber senkronizasyonu yönlendirmeleri (.well-known)
     redir /.well-known/carddav /remote.php/dav/ 301
     redir /.well-known/caldav /remote.php/dav/ 301
@@ -14,4 +15,14 @@
     handle {
         reverse_proxy nextcloud-app:80
     }
+}
+
+# Yerel HTTP erişimi (Port 80) - Sertifika uyarısı veya domain eşleşme hatası olmadan bağlantı
+http://localhost, http://127.0.0.1 {
+    import buzz_handlers
+}
+
+# Etki alanı (Domain) yapılandırması (Varsa Otomatik SSL / TLS)
+{$DOMAIN_NAME:localhost} {
+    import buzz_handlers
 }

@@ -53,11 +53,12 @@ Sistemi başlatmak, durdurmak ve izlemek için tek bir komut arayüzü (`./buzz-
 
 ## 🛡️ 3. Caddy Reverse Proxy & Domain Yapılandırması
 
-Sistemde web trafiği ve SSL yönetimi `caddy:2-alpine` imajı ile sağlanır. `Caddyfile` dosyası etki alanınızı dinamik olarak dinleyecek şekilde konfigüre edilmiştir.
+Sistemde web trafiği ve SSL yönetimi `caddy:2-alpine` imajı ile sağlanır. `Caddyfile` dosyası hem yerel geliştirmeyi (`http://localhost`, `http://127.0.0.1`) hem de tanımlanan etki alanını (`DOMAIN_NAME`) esnek bir şekilde dinleyecek şekilde konfigüre edilmiştir.
 
 ### 📄 `Caddyfile` İçeriği:
 ```caddy
-{$DOMAIN_NAME:localhost} {
+# Reusable proxy handlers
+(buzz_handlers) {
     # Nextcloud client ve takvim/rehber senkronizasyonu yönlendirmeleri (.well-known)
     redir /.well-known/carddav /remote.php/dav/ 301
     redir /.well-known/caldav /remote.php/dav/ 301
@@ -74,11 +75,22 @@ Sistemde web trafiği ve SSL yönetimi `caddy:2-alpine` imajı ile sağlanır. `
         reverse_proxy nextcloud-app:80
     }
 }
+
+# Yerel HTTP erişimi (Port 80) - Sertifika uyarısı veya domain eşleşme hatası olmadan bağlantı
+http://localhost, http://127.0.0.1 {
+    import buzz_handlers
+}
+
+# Etki alanı (Domain) yapılandırması (Varsa Otomatik SSL / TLS)
+{$DOMAIN_NAME:localhost} {
+    import buzz_handlers
+}
 ```
 
 - **Ana Web Trafiği (`/`):** Doğrudan Nextcloud uygulamasına yönlendirilir.
 - **WebSocket / Relay Trafiği (`/relay*`):** `buzz-relay` (Port 3000) servisine yönlendirilir.
-- **Otomatik SSL:** Gerçek bir domain kullanıldığında Caddy otomatik Let's Encrypt / ZeroSSL sertifikası alır.
+- **Yerel Erişim (`http://localhost` & `http://127.0.0.1`):** Yerel testlerde veya lokal sunucuda SSL sertifika uyarısı veya host uyumsuzluğu olmadan Port 80 üzerinden doğrudan HTTP bağlantısı sağlar.
+- **Otomatik SSL:** Gerçek bir domain tanımlandığında (`DOMAIN_NAME=buzz.example.com`), Caddy otomatik Let's Encrypt / ZeroSSL HTTPS sertifikası alır.
 
 ---
 
@@ -181,7 +193,7 @@ Sistemde iki temel otomasyon senaryosu tanımlıdır:
 
 ### 💬 9.1 Buzz Platformu (Nostr Protokolü)
 - **Mobil Web (PWA):** Tarayıcınızdan `https://buzz.domaininiz.com` adresine girip **Ana Ekrana Ekle** seçeneğini kullanabilirsiniz.
-- **Nostr İstemcileri:** iOS ve Android cihazlarda NIP-29 / NIP-42 destekli istemcilere (Primal, Amethyst, Damus vb.) `wss://buzz.domaininiz.com/relay` adresinizi ekleyebilirsiniz.
+- **Nostr İstemcileri:** iOS ve Android cihazlarda NIP-29 / NIP-42 destekli istemcilere `wss://buzz.domaininiz.com/relay` adresinizi ekleyebilirsiniz.
 - **Soru-Cevap & Etkileşim:** Buzz kanalı üzerinden Hermes'e doğrudan mesaj atarak arşivdeki dökümanlarınız hakkında soru sorabilirsiniz (Örn: *"Hermes, geçen hafta yüklediğim rapordaki maliyet tablolarını özetler misin?"*).
 
 ### ☁️ 9.2 Nextcloud & WebDAV Entegrasyonu
@@ -267,3 +279,12 @@ BUZZ_RELAY_PRIVATE_KEY must be set when BUZZ_REQUIRE_AUTH_TOKEN=true. A stable r
 
 ### ❓ 5. OpenRouter API Hatası
 - `.env` dosyasındaki `OPENROUTER_API_KEY` değerinizin geçerli ve bakiyeli olduğunu teyit edin.
+
+### ❓ 6. Localhost Bağlantı Sorunu Veya Caddy SSL Uyarısı
+`http://localhost` veya `https://localhost` üzerinden bağlanılamıyorsa:
+1. **Yerel Bağlantı:** Tarayıcınızdan `http://localhost` (HTTP, Port 80) adresini kullanın. `http://localhost` tanımı sayesinde HTTPS yönlendirmesi ve öz-imzalı (self-signed) SSL sertifika hataları yaşanmaz.
+2. **Domain Tanımı:** Yerel kullanım için `.env` dosyasında `DOMAIN_NAME=localhost` olduğundan emin olun. Gerçek bir etki alanı kullanıyorsanız `.env` içerisinde `DOMAIN_NAME=buzz.example.com` olarak ayarlayabilirsiniz.
+3. Caddy servisini yeniden başlatmak için:
+   ```bash
+   ./buzz-start restart
+   ```
