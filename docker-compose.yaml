@@ -6,6 +6,7 @@ volumes:
   postgres_data:
   redis_data:
   nextcloud_html:
+  nextcloud_data:
   qdrant_data: # Hafif vektör arama için yerel depolama
   minio_data:
 
@@ -236,7 +237,8 @@ services:
     restart: unless-stopped
     volumes:
       - nextcloud_html:/var/www/html
-      - /mnt/storagebox/nextcloud_data:/var/www/html/data
+      - nextcloud_data:/var/www/html/data
+      - ./nextcloud/hooks/pre-installation:/docker-entrypoint-hooks.d/pre-installation:ro
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_DB=nextcloud
