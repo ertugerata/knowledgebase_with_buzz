@@ -28,7 +28,7 @@ Guide, don't drive: give the user paste-ready commands and let them run anything
    - Pin `BUZZ_IMAGE` to a release tag for anything long-lived; `:main` moves daily.
 2. Set the URL block (`BUZZ_DOMAIN`, `RELAY_URL`, `BUZZ_MEDIA_BASE_URL`, `BUZZ_MEDIA_SERVER_DOMAIN`, `BUZZ_CORS_ORIGINS`) — all derive from one host choice. See the localhost footgun below before choosing.
 3. `./run.sh config` (validates; catches leftover CHANGE_ME), then `./run.sh start`. TLS on a public domain: `BUZZ_COMPOSE_TLS=true ./run.sh start`.
-4. Liveness: `curl -fsS http://127.0.0.1:3000/_liveness`.
+4. Liveness: `curl -fsS http://127.0.0.1:8080/_liveness`.
 5. Register members: `./run.sh add-member <pubkey>` for every human and every agent, **with `sleep 1` between adds** (same-second roster events collide). Verify with `./run.sh list-members`.
 6. Connect the desktop app with the exact `RELAY_URL`, create channels, add agents to channels, @mention.
 

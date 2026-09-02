@@ -12,7 +12,7 @@ echo ""
 
 # Yardımcı: Rastgele şifre üretme
 generate_password() {
-    tr -dc 'A-Za-z0-9!@#%^&*' </dev/urandom | head -c 18 ; echo
+    tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24 ; echo
 }
 
 # Var olan .env oku
