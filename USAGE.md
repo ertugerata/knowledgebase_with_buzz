@@ -224,6 +224,20 @@ docker exec -u www-data nextcloud-app php occ files:scan admin
   ./buzz-start logs
   ```
 
+### ❓ 2. PostgreSQL "password authentication failed for user buzz_user" Hatası
+`buzz-relay` loglarında `password authentication failed for user "buzz_user"` hatası alıyorsanız iki durumdan biri söz konusudur:
+1. **Şifre Değişikliği:** PostgreSQL veritabanı konteyneri ilk kez başlatıldığında `.env` içindeki `POSTGRES_PASSWORD` şifresiyle veritabanı birimini (volume) oluşturur. Daha sonra `.env` içindeki şifre değiştirilirse, PostgreSQL mevcut veritabanı birimindeki eski şifreyi korur.
+2. **Özel Karakterler:** Şifrede `@`, `#`, `%`, `&`, `?`, `/`, `:` gibi URL ayrıştırıcısını bozan özel karakterler varsa `DATABASE_URL` bağlantısı başarısız olur.
+
+**Çözüm Adımları:**
+- `.env` dosyanızdaki `POSTGRES_PASSWORD` ve `REDIS_PASSWORD` değerlerinin yalnızca alfa-nümerik (`A-Za-z0-9`) karakterlerden oluştuğundan emin olun (veya `./buzz-start wizard` sihirbazını tekrar çalıştırın).
+- PostgreSQL birimini sıfırlayarak yeni şifreyle yeniden başlatmak için:
+  ```bash
+  ./buzz-start down
+  docker volume rm app_postgres_data postgres_data 2>/dev/null || true
+  ./buzz-start start
+  ```
+
 ### ❓ 2. Nextcloud WebDAV Bağlantı Hatası
 - Nextcloud ilk açılışta veritabanı kurulumunu tamamlıyor olabilir. Birkaç dakika bekleyip `./buzz-start status` ile servis durumunu teyit edin.
 - `.env` dosyasındaki `NEXTCLOUD_ADMIN_USER` ve `NEXTCLOUD_ADMIN_PASSWORD` değerlerinin doğru girildiğinden emin olun.
