@@ -15,6 +15,11 @@ generate_password() {
     tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24 ; echo
 }
 
+# Yardımcı: 64 karakterli hex private key üretme
+generate_hex_key() {
+    tr -dc 'a-f0-9' </dev/urandom | head -c 64 ; echo
+}
+
 # Var olan .env oku
 if [ -f ".env" ]; then
     echo "ℹ️  Mevcut .env dosyası tespit edildi, varsayılan değerler buradan yüklenecek."
@@ -30,6 +35,8 @@ DEFAULT_NEXTCLOUD_ADMIN_USER="${NEXTCLOUD_ADMIN_USER:-admin}"
 DEFAULT_NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD:-$(generate_password)}"
 DEFAULT_DOMAIN_NAME="${DOMAIN_NAME:-localhost}"
 DEFAULT_BUZZ_AUTO_MIGRATE="${BUZZ_AUTO_MIGRATE:-true}"
+DEFAULT_BUZZ_REQUIRE_AUTH_TOKEN="${BUZZ_REQUIRE_AUTH_TOKEN:-false}"
+DEFAULT_BUZZ_RELAY_PRIVATE_KEY="${BUZZ_RELAY_PRIVATE_KEY:-$(generate_hex_key)}"
 DEFAULT_RELAY_OWNER_PUBKEY="${RELAY_OWNER_PUBKEY:-}"
 DEFAULT_BUZZ_REQUIRE_RELAY_MEMBERSHIP="${BUZZ_REQUIRE_RELAY_MEMBERSHIP:-false}"
 DEFAULT_OPENROUTER_API_KEY="${OPENROUTER_API_KEY:-}"
@@ -72,6 +79,12 @@ read -rp "Relay Üyelik Zorunluluğu (true/false) [${DEFAULT_BUZZ_REQUIRE_RELAY_
 BUZZ_REQUIRE_RELAY_MEMBERSHIP=${input_require_membership:-${DEFAULT_BUZZ_REQUIRE_RELAY_MEMBERSHIP:-$CALCULATED_REQUIRE_MEMBERSHIP}}
 BUZZ_AUTO_MIGRATE="${DEFAULT_BUZZ_AUTO_MIGRATE}"
 
+read -rp "Relay Auth Token Zorunluluğu (true/false) [$DEFAULT_BUZZ_REQUIRE_AUTH_TOKEN]: " input_require_auth
+BUZZ_REQUIRE_AUTH_TOKEN=${input_require_auth:-$DEFAULT_BUZZ_REQUIRE_AUTH_TOKEN}
+
+read -rp "Relay Private Key (64-char hex) [Gizli/Varsayılan Kullanılacak]: " input_relay_privkey
+BUZZ_RELAY_PRIVATE_KEY=${input_relay_privkey:-$DEFAULT_BUZZ_RELAY_PRIVATE_KEY}
+
 echo ""
 echo "--- 5. Yapay Zeka (LLM) API Ayarları ---"
 read -rp "OpenRouter API Key [$DEFAULT_OPENROUTER_API_KEY]: " input_openrouter
@@ -90,6 +103,8 @@ NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
 DOMAIN_NAME=${DOMAIN_NAME}
 BUZZ_AUTO_MIGRATE=${BUZZ_AUTO_MIGRATE}
 BUZZ_REQUIRE_RELAY_MEMBERSHIP=${BUZZ_REQUIRE_RELAY_MEMBERSHIP}
+BUZZ_REQUIRE_AUTH_TOKEN=${BUZZ_REQUIRE_AUTH_TOKEN}
+BUZZ_RELAY_PRIVATE_KEY=${BUZZ_RELAY_PRIVATE_KEY}
 RELAY_OWNER_PUBKEY=${RELAY_OWNER_PUBKEY}
 OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 DEFAULT_MODEL=${DEFAULT_MODEL}
