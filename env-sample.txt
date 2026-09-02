@@ -8,6 +8,8 @@ DOMAIN_NAME=domaininiz.com
 # --- Buzz Relay Ayarları ---
 BUZZ_AUTO_MIGRATE=true
 BUZZ_REQUIRE_RELAY_MEMBERSHIP=false
+BUZZ_REQUIRE_AUTH_TOKEN=false
+BUZZ_RELAY_PRIVATE_KEY=
 RELAY_OWNER_PUBKEY=
 
 # --- OpenRouter API Anahtarı ve LLM Modeli ---

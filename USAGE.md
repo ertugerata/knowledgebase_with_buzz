@@ -224,7 +224,27 @@ docker exec -u www-data nextcloud-app php occ files:scan admin
   ./buzz-start logs
   ```
 
-### ❓ 2. PostgreSQL "password authentication failed for user buzz_user" Hatası
+### ❓ 2. `buzz-relay` "BUZZ_RELAY_PRIVATE_KEY must be set when BUZZ_REQUIRE_AUTH_TOKEN=true" Panik Hatası
+`buzz-relay` loglarında aşağıdaki çökme hatasını alıyorsanız:
+```text
+thread 'main' (1) panicked at crates/buzz-relay/src/main.rs:436:9:
+BUZZ_RELAY_PRIVATE_KEY must be set when BUZZ_REQUIRE_AUTH_TOKEN=true. A stable relay identity is required for production.
+```
+**Neden:** `BUZZ_REQUIRE_AUTH_TOKEN=true` olarak ayarlandığında, relay sunucusunun kimliğini imzalamak için 64 karakterli hex formatında bir `BUZZ_RELAY_PRIVATE_KEY` anahtarına ihtiyaç duyulur.
+
+**Çözüm Adımları:**
+1. `./buzz-start wizard` komutu ile kurulum sihirbazını tekrar çalıştırın; sihirbaz sizin için otomatik olarak 64 karakterli bir hex anahtarı üretip `.env` dosyasına kaydedecektir.
+2. Alternatif olarak `.env` dosyanıza şu satırları ekleyip düzenleyebilirsiniz:
+   ```env
+   BUZZ_REQUIRE_AUTH_TOKEN=false
+   BUZZ_RELAY_PRIVATE_KEY=64_karakterli_hex_anahtariniz
+   ```
+3. Ardından servisleri yeniden başlatın:
+   ```bash
+   ./buzz-start restart
+   ```
+
+### ❓ 3. PostgreSQL "password authentication failed for user buzz_user" Hatası
 `buzz-relay` loglarında `password authentication failed for user "buzz_user"` hatası alıyorsanız iki durumdan biri söz konusudur:
 1. **Şifre Değişikliği:** PostgreSQL veritabanı konteyneri ilk kez başlatıldığında `.env` içindeki `POSTGRES_PASSWORD` şifresiyle veritabanı birimini (volume) oluşturur. Daha sonra `.env` içindeki şifre değiştirilirse, PostgreSQL mevcut veritabanı birimindeki eski şifreyi korur.
 2. **Özel Karakterler:** Şifrede `@`, `#`, `%`, `&`, `?`, `/`, `:` gibi URL ayrıştırıcısını bozan özel karakterler varsa `DATABASE_URL` bağlantısı başarısız olur.
@@ -238,9 +258,9 @@ docker exec -u www-data nextcloud-app php occ files:scan admin
   ./buzz-start start
   ```
 
-### ❓ 2. Nextcloud WebDAV Bağlantı Hatası
+### ❓ 4. Nextcloud WebDAV Bağlantı Hatası
 - Nextcloud ilk açılışta veritabanı kurulumunu tamamlıyor olabilir. Birkaç dakika bekleyip `./buzz-start status` ile servis durumunu teyit edin.
 - `.env` dosyasındaki `NEXTCLOUD_ADMIN_USER` ve `NEXTCLOUD_ADMIN_PASSWORD` değerlerinin doğru girildiğinden emin olun.
 
-### ❓ 3. OpenRouter API Hatası
+### ❓ 5. OpenRouter API Hatası
 - `.env` dosyasındaki `OPENROUTER_API_KEY` değerinizin geçerli ve bakiyeli olduğunu teyit edin.
