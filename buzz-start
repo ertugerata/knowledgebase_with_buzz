@@ -17,14 +17,15 @@ show_help() {
     echo "Kullanım: ./buzz-start [komut]"
     echo ""
     echo "Komutlar:"
-    echo "  start       Sistemi başlatır (.env yoksa kurulum sihirbazını önerir)"
-    echo "  stop        Çalışan sistem servislerini durdurur"
-    echo "  restart     Servisleri yeniden başlatır"
-    echo "  status | ps Servislerin güncel durumunu gösterir"
-    echo "  logs [srv]  Servis loglarını canlı izler (örn: ./buzz-start logs hermes)"
-    echo "  wizard      İnteraktif kurulum sihirbazını çalıştırır"
-    echo "  down        Servisleri durdurur ve konteynerleri kaldırır"
-    echo "  help        Bu yardım mesajını görüntüler"
+    echo "  start         Sistemi başlatır (.env yoksa kurulum sihirbazını önerir)"
+    echo "  stop          Çalışan sistem servislerini durdurur"
+    echo "  restart       Servisleri yeniden başlatır"
+    echo "  status | ps   Servislerin güncel durumunu ve portlarını gösterir"
+    echo "  health|check  Her bir konteynerin sağlık durumunu detaylı kontrol eder"
+    echo "  logs [srv]    Servis loglarını canlı izler (örn: ./buzz-start logs hermes)"
+    echo "  wizard        İnteraktif kurulum sihirbazını çalıştırır"
+    echo "  down          Servisleri durdurur ve konteynerleri kaldırır"
+    echo "  help          Bu yardım mesajını görüntüler"
     echo ""
 }
 
@@ -74,6 +75,28 @@ case "$COMMAND" in
     status|ps)
         echo "📌 Servis Durumları:"
         docker compose ps
+        ;;
+
+    health|check)
+        echo "🔍 Konteyner Sağlık Durumları Kontrol Ediliyor..."
+        echo "=========================================="
+        docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Health}}" 2>/dev/null || docker compose ps
+        echo ""
+        echo "📊 Detaylı Konteyner Durum Raporu:"
+        for container in buzz-caddy buzz-browserless buzz-qdrant buzz-relay buzz-postgres buzz-redis hermes-agent nextcloud-app; do
+            if docker inspect --format '{{.State.Running}}' "$container" 2>/dev/null | grep -q "true"; then
+                health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$container" 2>/dev/null || echo "unknown")
+                if [ "$health" = "healthy" ]; then
+                    echo "  ✅ $container: Sağlıklı ($health)"
+                elif [ "$health" = "starting" ]; then
+                    echo "  ⏳ $container: Başlatılıyor ($health)"
+                else
+                    echo "  ⚠️ $container: Durum ($health)"
+                fi
+            else
+                echo "  ❌ $container: Çalışmıyor (Durduruldu)"
+            fi
+        done
         ;;
 
     logs)

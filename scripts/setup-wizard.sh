@@ -30,6 +30,7 @@ DEFAULT_NEXTCLOUD_ADMIN_USER="${NEXTCLOUD_ADMIN_USER:-admin}"
 DEFAULT_NEXTCLOUD_ADMIN_PASSWORD="${NEXTCLOUD_ADMIN_PASSWORD:-$(generate_password)}"
 DEFAULT_DOMAIN_NAME="${DOMAIN_NAME:-localhost}"
 DEFAULT_OPENROUTER_API_KEY="${OPENROUTER_API_KEY:-}"
+DEFAULT_LLM_MODEL="${DEFAULT_MODEL:-openrouter/free}"
 
 echo "--- 1. Veritabanı ve Önbellek Ayarları ---"
 read -rp "PostgreSQL Kullanıcı Adı [$DEFAULT_POSTGRES_USER]: " input_pg_user
@@ -59,6 +60,9 @@ echo "--- 4. Yapay Zeka (LLM) API Ayarları ---"
 read -rp "OpenRouter API Key [$DEFAULT_OPENROUTER_API_KEY]: " input_openrouter
 OPENROUTER_API_KEY=${input_openrouter:-$DEFAULT_OPENROUTER_API_KEY}
 
+read -rp "Varsayılan LLM Modeli [$DEFAULT_LLM_MODEL]: " input_model
+DEFAULT_MODEL=${input_model:-$DEFAULT_LLM_MODEL}
+
 # .env dosyasına yaz
 cat <<EOF > .env
 POSTGRES_USER=${POSTGRES_USER}
@@ -68,6 +72,7 @@ NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
 NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
 DOMAIN_NAME=${DOMAIN_NAME}
 OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+DEFAULT_MODEL=${DEFAULT_MODEL}
 EOF
 
 chmod 600 .env
@@ -80,6 +85,7 @@ echo "Yapılandırma özeti:"
 echo "  - Domain: $DOMAIN_NAME"
 echo "  - Postgres User: $POSTGRES_USER"
 echo "  - Nextcloud User: $NEXTCLOUD_ADMIN_USER"
+echo "  - LLM Model: $DEFAULT_MODEL"
 echo ""
 
 read -rp "Sistemi şimdi başlatmak ister misiniz? (y/N): " confirm_start

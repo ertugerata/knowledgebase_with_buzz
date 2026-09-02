@@ -1,0 +1,34 @@
+{
+  "skill_name": "hermes-in-buzz",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Set up a dedicated Hermes agent on my Linux server so it can respond in my Buzz community. My desktop is separate from the server.",
+      "expected_output": "A native-gateway setup plan that discovers the host, uses a dedicated agent identity, preserves owner-only access, and defines an inbound and outbound verification exchange.",
+      "assertions": [
+        "The response selects the native gateway topology.",
+        "The response does not ask the user to paste a private key into chat.",
+        "The response requires a real relay and message-flow verification."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "The gateway key matches my Buzz agent but buzz channels list returns relay_membership_required. What should I do?",
+      "expected_output": "A safe diagnosis that preserves the confirmed agent key, distinguishes relay admission from channel membership, and describes direct membership or NIP-OA as the next path.",
+      "assertions": [
+        "The response does not recommend repeatedly generating replacement identities.",
+        "The response treats relay admission and channel membership as separate checks.",
+        "The response keeps owner key material out of chat and command-line arguments."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I want Buzz Desktop to own the runtime and show ACP activity for my Hermes agent.",
+      "expected_output": "A clear boundary response that redirects from the native remote-gateway workflow to the official buzz-acp relay-bridge guidance.",
+      "assertions": [
+        "The response does not start a native gateway setup.",
+        "The response identifies the requested Buzz-managed ACP architecture."
+      ]
+    }
+  ]
+}
