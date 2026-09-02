@@ -1,0 +1,34 @@
+{
+  "skill_name": "buzz-self-hosting",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I launched the self-hosted Buzz Docker Compose stack, but the desktop app gets a 404 when it connects through localhost.",
+      "expected_output": "A layer-by-layer diagnosis that checks the configured relay URL and addresses the documented localhost versus 127.0.0.1 loopback mismatch before changing unrelated services.",
+      "assertions": [
+        "The response checks the relay URL before recommending a rebuild.",
+        "The response distinguishes localhost from 127.0.0.1 where relevant.",
+        "The response verifies the fix from a real client connection."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "My self-hosted relay is closed. Add a new agent safely and verify it can join the intended channel.",
+      "expected_output": "A security-conscious membership workflow that separates relay admission, channel membership, and successful end-to-end messaging.",
+      "assertions": [
+        "The response does not request private keys in chat.",
+        "The response distinguishes relay admission from channel membership.",
+        "The response requires an actual message exchange for verification."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "My unrelated Docker Compose application has a failing Postgres health check. Help me fix Docker.",
+      "expected_output": "A boundary response that recognizes this is not a self-hosted Buzz relay task and avoids applying Buzz-specific instructions.",
+      "assertions": [
+        "The response does not invoke Buzz relay setup steps.",
+        "The response clearly identifies the request as general Docker troubleshooting."
+      ]
+    }
+  ]
+}

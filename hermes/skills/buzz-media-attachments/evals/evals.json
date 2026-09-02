@@ -1,0 +1,35 @@
+{
+  "skill_name": "buzz-media-attachments",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Attach /srv/renders/demo.mp4 to the current Buzz conversation with the caption Demo cut.",
+      "expected_output": "A workflow that verifies the source and live channel, sends the file with the native Buzz CLI, and reports only a confirmed accepted result.",
+      "assertions": [
+        "The response uses buzz messages send with a file attachment.",
+        "The response does not guess the channel UUID.",
+        "The response requires accepted true and an event ID before reporting success."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Buzz rejected my MP4 because the moov atom is not at the front. Fix it and retry without changing the source video.",
+      "expected_output": "A fast-start remux into a separate output file, followed by a native Buzz attachment retry and acceptance verification.",
+      "assertions": [
+        "The response preserves the source MP4.",
+        "The response uses an MP4 fast-start remux before retrying.",
+        "The response checks the returned relay result."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "The recipient asked for an image attachment instead of my short MP4 clip.",
+      "expected_output": "A GIF fallback workflow that creates a separate derived file and uploads it through the native attachment command.",
+      "assertions": [
+        "The response selects GIF as the image-compatible fallback.",
+        "The response strips metadata from the derived output.",
+        "The response does not claim delivery without Buzz acceptance."
+      ]
+    }
+  ]
+}

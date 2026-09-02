@@ -28,7 +28,7 @@ Sistem aşağıdaki mikroservislerden ve bileşenlerden oluşmaktadır:
 +--------+-------------------------------------------+--------+
 |                       Hermes Agent                          |
 |                       (./hermes)                            |
-|  - OpenRouter LLM (Gemini 3.1 Flash / Llama 3.3 70B)       |
+|  - OpenRouter LLM (openrouter/free / Gemini 3.1 Flash)     |
 |  - Qdrant Vector Memory Integration                         |
 |  - Browserless Scraping Desteği                            |
 |  - MCP Server Protokolleri (Fetch, YouTube Transcript)     |
@@ -99,6 +99,9 @@ Sihirbaz tamamlandıktan sonra veya doğrudan aşağıdaki komutla tüm sistemi 
 
 # Çalışan tüm servislerin durumunu görüntüler
 ./buzz-start status
+
+# Konteynerlerin sağlık durumlarını detaylı kontrol eder
+./buzz-start health
 
 # Canlı logları izler (Tüm servisler)
 ./buzz-start logs

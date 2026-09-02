@@ -44,6 +44,7 @@ Sistemi başlatmak, durdurmak ve izlemek için tek bir komut arayüzü (`./buzz-
 | `./buzz-start stop` | Çalışan tüm servisleri veri kaybı olmadan durdurur. |
 | `./buzz-start restart` | Tüm servisleri sırasıyla yeniden başlatır. |
 | `./buzz-start status` / `./buzz-start ps` | Servislerin aktif/pasif durumunu ve port eşleşmelerini gösterir. |
+| `./buzz-start health` / `./buzz-start check` | Her bir konteynerin sağlık durumunu (healthy/starting/unhealthy) detaylı şekilde kontrol eder. |
 | `./buzz-start logs [servis_adi]` | Servis loglarını canlı takip eder (örn: `./buzz-start logs hermes` veya tümü için `./buzz-start logs`). |
 | `./buzz-start wizard` | Kurulum sihirbazını tekrar çalıştırır. |
 | `./buzz-start down` | Servisleri durdurur ve konteynerleri kaldırır. |
@@ -86,7 +87,7 @@ Sistemde web trafiği ve SSL yönetimi `caddy:2-alpine` imajı ile sağlanır. `
 Hermes Agent, OpenRouter bulut LLM sağlayıcısını kullanarak yüksek akıl yürütme ve görev icra etme yeteneğine sahiptir.
 
 ### 🤖 4.1 Kullanılan LLM Modelleri
-- **Default Model:** `google/gemini-3.1-flash` (Hızlı yanıt ve genel görev icrası)
+- **Default Model:** `openrouter/free` (Ön tanımlı ücretsiz model; `.env` içerisinde `DEFAULT_MODEL` ile dilediğiniz an değiştirebilirsiniz)
 - **Deep Research Model:** `meta-llama/llama-3.3-70b-instruct` (Karmaşık araştırmalar ve analizler)
 
 ### 🔌 4.2 MCP Konfigürasyonu (`hermes/mcp_config.json`)
