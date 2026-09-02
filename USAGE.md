@@ -198,10 +198,13 @@ Sistemde iki temel otomasyon senaryosu tanımlıdır:
 Google Drive üzerindeki belirli bir klasörün Nextcloud ile canlı senkronize kalması için sunucu tarafında `rclone` ve `cron` kullanılabilir:
 
 ```bash
-# 1. Google Drive klasörünü Nextcloud dizinine senkronize etme
-rclone sync gdrive:HedefKlasor /mnt/storagebox/nextcloud_data/admin/files/Bilgi_Tabani/Google_Sync/
+# 1. Nextcloud veri birimi (volume) yolunu tespit etme
+NEXTCLOUD_DATA_PATH=$(docker volume inspect $(docker volume ls -q -f name=nextcloud_data) --format '{{.Mountpoint}}')
 
-# 2. Senkronizasyon sonrası Nextcloud dosya indeksini tarama
+# 2. Google Drive klasörünü Nextcloud dizinine senkronize etme
+rclone sync gdrive:HedefKlasor "${NEXTCLOUD_DATA_PATH}/admin/files/Bilgi_Tabani/Google_Sync/"
+
+# 3. Senkronizasyon sonrası Nextcloud dosya indeksini tarama
 docker exec -u www-data nextcloud-app php occ files:scan admin
 ```
 
