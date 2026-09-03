@@ -76,8 +76,8 @@ Sistemde web trafiği ve SSL yönetimi `caddy:2-alpine` imajı ile sağlanır. `
     }
 }
 
-# Yerel HTTP erişimi (Port 80) - Sertifika uyarısı veya domain eşleşme hatası olmadan bağlantı
-http://localhost, http://127.0.0.1 {
+# Yerel HTTP erişimi (Port 80) - ChromeOS Crostini VM IP'leri (100.115.92.x), LAN IP'leri ve localhost/127.0.0.1 için
+http:// {
     import buzz_handlers
 }
 
@@ -280,11 +280,22 @@ BUZZ_RELAY_PRIVATE_KEY must be set when BUZZ_REQUIRE_AUTH_TOKEN=true. A stable r
 ### ❓ 5. OpenRouter API Hatası
 - `.env` dosyasındaki `OPENROUTER_API_KEY` değerinizin geçerli ve bakiyeli olduğunu teyit edin.
 
-### ❓ 6. Localhost Bağlantı Sorunu Veya Caddy SSL Uyarısı
-`http://localhost` veya `https://localhost` üzerinden bağlanılamıyorsa:
-1. **Yerel Bağlantı:** Tarayıcınızdan `http://localhost` (HTTP, Port 80) adresini kullanın. `http://localhost` tanımı sayesinde HTTPS yönlendirmesi ve öz-imzalı (self-signed) SSL sertifika hataları yaşanmaz.
-2. **Domain Tanımı:** Yerel kullanım için `.env` dosyasında `DOMAIN_NAME=localhost` olduğundan emin olun. Gerçek bir etki alanı kullanıyorsanız `.env` içerisinde `DOMAIN_NAME=buzz.example.com` olarak ayarlayabilirsiniz.
-3. Caddy servisini yeniden başlatmak için:
+### ❓ 6. ChromeOS + Docker / Localhost Bağlantı Sorunu Veya Caddy SSL Uyarısı
+ChromeOS (Crostini Linux VM) ortamında veya yerel ağda `http://localhost` ya da IP adresi üzerinden bağlanılamıyorsa:
+
+#### Neden ChromeOS'ta `localhost` Doğrudan Çalışmaz?
+1. **Ağ Mimarisi:** ChromeOS'ta Docker, Crostini (Linux Sanal Makinesi) içinde çalışır. ChromeOS tarayıcısındaki `localhost`, ChromeOS sisteminin kendisini ifade eder, Linux VM'ini değil.
+2. **Port Yönlendirme:** ChromeOS Ayarlarından 80/443 port yönlendirmesi açılmadıkça ChromeOS tarayıcısı Linux VM'ine ulaşamaz.
+3. **Caddy Host Header Eşleşmesi:** Önceden Caddyfile sadece `localhost` ve `127.0.0.1` Host başlıklarını kabul ediyordu. Crostini VM IP'si (ör. `100.115.92.x`) üzerinden gelen istekler eşleşmiyordu. Caddyfile artık `http://` genel yakalayıcısı (catch-all) ile tüm HTTP isteklerini yanıtlamaktadır.
+
+#### Çözüm Adımları:
+1. **ChromeOS Port Yönlendirmesini Etkinleştirin:**
+   - ChromeOS **Ayarlar > Gelişmiş > Geliştiriciler > Linux geliştirme ortamı > Bağlantı noktaları** ekranına gidin.
+   - **80** (ve gerekirse **443**) portu için bağlantı noktası yönlendirmesi ekleyin.
+2. **Linux VM IP Adresi İle Erişin (Alternatif Yöntem):**
+   - Crostini terminalinizde `ip addr show eth0 | grep "inet "` komutuyla VM IP adresinizi öğrenin (ör. `100.115.92.5`).
+   - ChromeOS tarayıcınızda `http://100.115.92.5` adresini açın.
+3. **Caddy Servisini Yeniden Başlatın:**
    ```bash
    ./buzz-start restart
    ```
