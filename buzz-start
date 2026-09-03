@@ -40,9 +40,21 @@ case "$COMMAND" in
                 exit 0
             else
                 if [ -f "env-sample.txt" ]; then
-                    echo "ℹ️  env-sample.txt dosyası .env olarak kopyalanıyor..."
+                    echo "ℹ️  env-sample.txt dosyası .env olarak kopyalanıyor ve rastgele sırlar üretiliyor..."
                     cp env-sample.txt .env
-                    echo "⚠️ Lütfen .env dosyasını kendi API anahtarlarınız ve şifrelerinizle güncelleyin!"
+
+                    gen_pass() { tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24 ; echo ; }
+                    gen_hex() { tr -dc 'a-f0-9' </dev/urandom | head -c 64 ; echo ; }
+
+                    sed -i "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=$(gen_pass)|" .env
+                    sed -i "s|^REDIS_PASSWORD=.*|REDIS_PASSWORD=$(gen_pass)|" .env
+                    sed -i "s|^MINIO_ROOT_PASSWORD=.*|MINIO_ROOT_PASSWORD=$(gen_pass)|" .env
+                    sed -i "s|^NEXTCLOUD_ADMIN_PASSWORD=.*|NEXTCLOUD_ADMIN_PASSWORD=$(gen_pass)|" .env
+                    sed -i "s|^BUZZ_RELAY_PRIVATE_KEY=.*|BUZZ_RELAY_PRIVATE_KEY=$(gen_hex)|" .env
+
+                    chmod 600 .env
+                    echo "🔒 Güvenli rastgele şifreler otomatik üretildi ve .env dosyasına yazıldı."
+                    echo "⚠️ Lütfen .env dosyasını kendi API anahtarlarınızla (OPENROUTER_API_KEY) güncelleyin!"
                 else
                     echo "❌ HATA: env-sample.txt bulunamadı."
                     exit 1
