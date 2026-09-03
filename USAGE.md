@@ -251,7 +251,7 @@ BUZZ_RELAY_PRIVATE_KEY must be set when BUZZ_REQUIRE_AUTH_TOKEN=true. A stable r
 1. `./buzz-start wizard` komutu ile kurulum sihirbazını tekrar çalıştırın; sihirbaz sizin için otomatik olarak 64 karakterli bir hex anahtarı üretip `.env` dosyasına kaydedecektir.
 2. Alternatif olarak `.env` dosyanıza şu satırları ekleyip düzenleyebilirsiniz:
    ```env
-   BUZZ_REQUIRE_AUTH_TOKEN=false
+   BUZZ_REQUIRE_AUTH_TOKEN=true
    BUZZ_RELAY_PRIVATE_KEY=64_karakterli_hex_anahtariniz
    ```
 3. Ardından servisleri yeniden başlatın:

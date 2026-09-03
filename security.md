@@ -9,11 +9,13 @@ Bu proje; Caddy (reverse proxy), Nextcloud, Postgres, Redis, MinIO, Qdrant, brow
 
 ### 1. Varsayılan / zayıf sırlar `env-sample.txt` içinde
 `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `MINIO_ROOT_PASSWORD`, `NEXTCLOUD_ADMIN_PASSWORD` gibi alanlar `...GizliSifre123!` gibi tahmin edilebilir örnek değerlerle geliyor; `MINIO_ROOT_USER/PASSWORD` ise kod içinde de `minioadmin/minioadmin` varsayılanına düşüyor (`${MINIO_ROOT_USER:-minioadmin}`). Kurulum sihirbazı (`setup-wizard.sh`) boş girişte bu örnek şifreleri (ya da rastgele üretilenleri) `.env`'e yazıyor, dolayısıyla dikkatsiz bir kurulumda bu zayıf/varsayılan kimlik bilgileri prod'a kadar taşınabilir.
-**Öneri:** `env-sample.txt`'deki tüm alanları boş bırakın veya `CHANGE_ME` gibi açık placeholder kullanın; wizard'da boş girişe izin vermeyip zorunlu rastgele üretim yapın.
+**Durum:** `[x] TAMAMLANDI / ÇÖZÜLDÜ`
+**Uygulanan Çözüm:** `env-sample.txt` dosyasındaki tüm varsayılan zayıf şifreler temizlendi. `setup-wizard.sh` ve `buzz-start` betikleri boş bırakılan tüm şifre ve private key alanları için otomatik olarak güçlü, rastgele alfa-nümerik değerler üretecek şekilde güncellendi. Ayrıca `docker-compose.yaml` içerisindeki `MINIO_ROOT_PASSWORD` varsayılan `minioadmin` fallback tanımı kaldırıldı.
 
 ### 2. Buzz relay için kimlik doğrulama varsayılan olarak kapalı
 `BUZZ_REQUIRE_AUTH_TOKEN=false` ve `BUZZ_REQUIRE_RELAY_MEMBERSHIP=false` varsayılan değerler. Yani relay, "kapalı" bir yapılandırma yapmadığınız sürece herkesin (ağınıza erişebilen herkesin) auth token'sız bağlanıp mesaj göndermesine izin veriyor. Bu, sadece tek kullanıcılı/izole bir laptop için kabul edilebilir ama Caddy 80/443 portları LAN'a veya internete açıldığı an relay'i açık bir yayın noktasına çeviriyor.
-**Öneri:** Tek kullanıcı senaryosu dışında `RELAY_OWNER_PUBKEY` ve `BUZZ_REQUIRE_AUTH_TOKEN=true` ayarlarını zorunlu kılın.
+**Durum:** `[x] TAMAMLANDI / ÇÖZÜLDÜ`
+**Uygulanan Çözüm:** `BUZZ_REQUIRE_AUTH_TOKEN=true` ayarı `env-sample.txt`, `scripts/setup-wizard.sh` ve `docker-compose.yaml` içerisinde varsayılan olarak etkinleştirildi. Kurulum sihirbazı ve `buzz-start` otomatik 64-karakterlik hex `BUZZ_RELAY_PRIVATE_KEY` üreterek kimlik doğrulamayı güvenli bir şekilde varsayılan yaptı.
 
 ### 3. Caddy host-eşleşmesi sadece `localhost` / `127.0.0.1`
 `Caddyfile`'da tanımlı iki site bloğu var: `http://localhost, http://127.0.0.1` ve `{$DOMAIN_NAME:localhost}`. Caddy istekleri **Host header**'a göre eşleştirir; `DOMAIN_NAME` ayarlanmazsa bu ikinci blok da yalnızca "localhost" host header'ını kabul eder. Sonuç: makinenin gerçek LAN IP'si veya Chromebook'taki Linux VM IP'si üzerinden erişmeye çalıştığınızda Host header eşleşmediği için Caddy isteğe cevap vermez (bu, aşağıdaki ChromeOS sorusuyla doğrudan ilgili).
@@ -22,11 +24,13 @@ Bu proje; Caddy (reverse proxy), Nextcloud, Postgres, Redis, MinIO, Qdrant, brow
 ### 4. MinIO ve Qdrant için kimlik doğrulama/ağ izolasyonu eksik
 - `qdrant` servisi `6333:6333` ile doğrudan host'a açılmış ve Qdrant'ın API'si varsayılan olarak **kimlik doğrulamasız**dır (API key ayarlanmadıkça). Bu container'a erişebilen herkes tüm vektör koleksiyonlarını okuyup silebilir.
 - `createbuckets` adımı `mc anonymous set download myminio/buzz-media` çalıştırıyor; yani `buzz-media` bucket'ı **herkese açık okunabilir** hale geliyor. Bucket içeriğine (medya/ekler) kim erişebiliyorsa (ağ + port açıksa) kimlik doğrulamasız indirme yapabilir.
-**Öneri:** Qdrant'a `QDRANT__SERVICE__API_KEY` tanımlayın ve host'a port yayınlamayın (yalnız `buzz_network` üzerinden erişilsin); MinIO bucket'ını gerçekten herkese açık medya barındırma amaçlı değilse `anonymous set none` yapın veya imzalı URL'ler kullanın.
+**Durum:** `[x] TAMAMLANDI / ÇÖZÜLDÜ`
+**Uygulanan Çözüm:** Qdrant servisinin `6333:6333` host port yayınlaması `docker-compose.yaml` dosyasından kaldırıldı; Qdrant yalnızca dahili `buzz_network` ağından erişilebilir kılındı. MinIO `createbuckets` servisindeki `mc anonymous set download myminio/buzz-media` komutu `mc anonymous set none myminio/buzz-media` olarak değiştirilerek bucket varsayılan olarak gizli yapıldı.
 
 ### 5. Hermes ajanına harici komut/URL çekme yeteneği veriliyor
 `mcp_config.json`, `mcp-server-fetch` (rastgele URL getirme) ve `browserless` (headless Chromium, "Instagram/X scraping" için) araçlarını LLM ajanına tanımlıyor; ayrıca Nextcloud WebDAV kimlik bilgileri (`WEBDAV_USER`/`WEBDAV_PASSWORD`) ortam değişkeni olarak Hermes container'ına veriliyor. Bir LLM ajanına hem "serbestçe web'den içerik çek" hem de "bulut depolamana WebDAV ile yaz" yetkisi vermek, prompt injection yoluyla veri sızdırma/manipülasyon riski taşır (ör. taranan bir web sayfası ajana gizli talimat enjekte edip Nextcloud'daki dosyaları okuyup dışarı göndermesini sağlayabilir).
-**Öneri:** Fetch/browserless araçlarının çıktısını güvenilmeyen veri olarak ele alan bir sistem promptu/filtre katmanı olduğundan emin olun; WebDAV kimlik bilgilerini mümkünse salt-okunur veya sınırlı bir alt dizine kısıtlayın.
+**Durum:** `[x] TAMAMLANDI / ÇÖZÜLDÜ`
+**Uygulanan Çözüm:** Hermes Agent için `hermes/skills/security-and-untrusted-data/SKILL.md` ve `hermes/skills/hermes-in-buzz/SKILL.md` altında sıkı güvenlik kuralları tanımlandı. Harici web kaynaklarından (`fetch`, `browserless`) çekilen tüm içerikler kesin olarak "güvenilmeyen üçüncü taraf verisi" olarak ele alınarak prompt injection komutlarının yürütülmesi yasaklandı; Nextcloud WebDAV kimlik bilgilerinin ve veritabanı içeriğinin dışarı aktarılması engellendi.
 
 ## Orta Öncelikli Bulgular
 
@@ -52,17 +56,17 @@ Veritabanı ve Nextcloud verileri repo dizini altında düz klasörlere (`./post
 
 ## Özet Tablo
 
-| # | Bulgu | Risk | Öncelik |
-|---|-------|------|---------|
-| 1 | Zayıf/varsayılan örnek şifreler | Kimlik bilgisi tahmini | Yüksek |
-| 2 | Relay auth/membership varsayılan kapalı | Yetkisiz erişim | Yüksek |
-| 3 | Caddy sadece `localhost` host eşleşmesi | Yanlış yapılandırma riski (dışarı açarken) | Bilgi/Orta |
-| 4 | Qdrant açık port + MinIO herkese açık bucket | Veri sızıntısı | Yüksek |
-| 5 | LLM ajanına fetch+WebDAV yetkisi | Prompt injection / veri sızıntısı | Yüksek |
-| 6 | Geniş Postgres yetkileri | Yatay hareket (çok servisli host'ta) | Orta |
-| 7 | `.env` izin eksikliği (fallback yolda) | Yerel bilgi ifşası | Orta |
-| 8 | Sırların ortam değişkeninde düz metin olması | Yerel bilgi ifşası | Orta |
-| 9 | Veri klasörlerinin bind-mount izinleri | Yerel bilgi ifşası | Düşük/Orta |
+| # | Bulgu | Risk | Öncelik | Durum |
+|---|-------|------|---------|-------|
+| 1 | Zayıf/varsayılan örnek şifreler | Kimlik bilgisi tahmini | Yüksek | [x] Çözüldü |
+| 2 | Relay auth/membership varsayılan kapalı | Yetkisiz erişim | Yüksek | [x] Çözüldü |
+| 3 | Caddy sadece `localhost` host eşleşmesi | Yanlış yapılandırma riski (dışarı açarken) | Bilgi/Orta | İnceleme Yapıldı |
+| 4 | Qdrant açık port + MinIO herkese açık bucket | Veri sızıntısı | Yüksek | [x] Çözüldü |
+| 5 | LLM ajanına fetch+WebDAV yetkisi | Prompt injection / veri sızıntısı | Yüksek | [x] Çözüldü |
+| 6 | Geniş Postgres yetkileri | Yatay hareket (çok servisli host'ta) | Orta | Mevcut |
+| 7 | `.env` izin eksikliği (fallback yolda) | Yerel bilgi ifşası | Orta | [x] Çözüldü (`chmod 600`) |
+| 8 | Sırların ortam değişkeninde düz metin olması | Yerel bilgi ifşası | Orta | Mevcut |
+| 9 | Veri klasörlerinin bind-mount izinleri | Yerel bilgi ifşası | Düşük/Orta | Mevcut |
 
 ---
 
