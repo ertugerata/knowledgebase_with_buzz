@@ -289,12 +289,19 @@ ChromeOS (Crostini Linux VM) ortamında veya yerel ağda `http://localhost` ya d
 3. **Caddy Host Header Eşleşmesi:** Önceden Caddyfile sadece `localhost` ve `127.0.0.1` Host başlıklarını kabul ediyordu. Crostini VM IP'si (ör. `100.115.92.x`) üzerinden gelen istekler eşleşmiyordu. Caddyfile artık `http://` genel yakalayıcısı (catch-all) ile tüm HTTP isteklerini yanıtlamaktadır.
 
 #### Çözüm Adımları:
-1. **ChromeOS Port Yönlendirmesini Etkinleştirin:**
+1. **Nextcloud Güvenilir Etki Alanları (Trusted Domains) Ayarı:**
+   Nextcloud varsayılan olarak yalnızca tanımlı alan adlarından gelen bağlantıları kabul eder. IP adresi (ör. `100.115.92.197`) ile erişildiğinde "BT yöneticiniz ile görüşün... trusted_domain" uyarısı alınır.
+   - `.env` dosyanıza IP adresinizi ekleyin:
+     ```env
+     NEXTCLOUD_ADDITIONAL_TRUSTED_DOMAINS=100.115.92.197
+     ```
+   - Veya çalışan Nextcloud konteyneri içerisinden doğrudan güvenilir alan adı ekleyin:
+     ```bash
+     docker exec -u www-data nextcloud-app php occ config:system:set trusted_domains 2 --value=100.115.92.197
+     ```
+2. **ChromeOS Port Yönlendirmesini Etkinleştirin:**
    - ChromeOS **Ayarlar > Gelişmiş > Geliştiriciler > Linux geliştirme ortamı > Bağlantı noktaları** ekranına gidin.
-   - **80** (ve gerekirse **443**) portu için bağlantı noktası yönlendirmesi ekleyin.
-2. **Linux VM IP Adresi İle Erişin (Alternatif Yöntem):**
-   - Crostini terminalinizde `ip addr show eth0 | grep "inet "` komutuyla VM IP adresinizi öğrenin (ör. `100.115.92.5`).
-   - ChromeOS tarayıcınızda `http://100.115.92.5` adresini açın.
+   - **80** (ve gerekirse **443**) portu için bağlantı noktası yönlendirmesi ekleyin. Bu sayede ChromeOS tarayıcısından `http://localhost` yazdığınızda istek doğrudan Linux VM'ine iletilir.
 3. **Caddy Servisini Yeniden Başlatın:**
    ```bash
    ./buzz-start restart

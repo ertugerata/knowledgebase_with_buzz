@@ -246,6 +246,7 @@ services:
       - REDIS_HOST_PASSWORD=${REDIS_PASSWORD}
       - NC_SETUP_CREATE_DB_USER=false
       - NC_setup_create_db_user=false
+      - NEXTCLOUD_TRUSTED_DOMAINS=localhost 127.0.0.1 ${DOMAIN_NAME:-localhost} ${NEXTCLOUD_ADDITIONAL_TRUSTED_DOMAINS:-}
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:80/status.php || wget --no-verbose --tries=1 --spider http://localhost:80/status.php || exit 1"]
       interval: 10s
