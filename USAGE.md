@@ -191,10 +191,13 @@ Sistemde iki temel otomasyon senaryosu tanımlıdır:
 
 ## 📲 9. Cihazlardan Erişim ve Kullanım Senaryoları
 
-### 💬 9.1 Buzz Platformu (Nostr Protokolü)
-- **Mobil Web (PWA):** Tarayıcınızdan `https://buzz.domaininiz.com` adresine girip **Ana Ekrana Ekle** seçeneğini kullanabilirsiniz.
-- **Nostr İstemcileri:** iOS ve Android cihazlarda NIP-29 / NIP-42 destekli istemcilere `wss://buzz.domaininiz.com/relay` adresinizi ekleyebilirsiniz.
-- **Soru-Cevap & Etkileşim:** Buzz kanalı üzerinden Hermes'e doğrudan mesaj atarak arşivdeki dökümanlarınız hakkında soru sorabilirsiniz (Örn: *"Hermes, geçen hafta yüklediğim rapordaki maliyet tablolarını özetler misin?"*).
+### 💬 9.1 Buzz Platformu ve Hermes Etkileşimi
+- **Buzz Arayüzüne Erişim:** Buzz Masaüstü veya Web istemcisini (ya da NIP-29/NIP-42 destekli Nostr istemcilerini) açıp relay sunucusu olarak `ws://localhost/relay` (veya etki alanınız varsa `wss://buzz.domaininiz.com/relay`) adresini ekleyerek topluluğa ve mesajlaşma arayüzüne bağlanabilirsiniz.
+- **Hermes Dashboard Durumu:** Hermes Agent "headless" (arkaplanda çalışan arayüzsüz) bir yapay zeka ajanıdır; bağımsız bir web paneli (dashboard) bulunmamaktadır. Hermes'in yönetim ve bilgi tabanı paneli **Nextcloud** (`http://localhost`), canlı mesajlaşma ve komut arayüzü ise **Buzz** platformudur.
+- **Hermes'in Yanıt Verdiğini Anlama:**
+  1. **Arayüz Üzerinden:** Buzz veya Nostr istemcisinde Hermes'e DM göndererek ya da bir kanalda etiketleyerek (`@Hermes merhaba`) yanıt yazıp yazmadığını görebilirsiniz.
+  2. **Canlı Log Taktibi:** Terminalde `./buzz-start logs hermes` komutunu çalıştırarak Hermes'in gelen mesajları alıp almadığını ve ürettiği yanıtları anlık takip edebilirsiniz.
+  3. **Sağlık Durumu:** `./buzz-start health` veya `./buzz-start status` komutları ile `hermes-agent` konteynerinin aktif (`healthy`) olup olmadığını kontrol edebilirsiniz.
 
 ### ☁️ 9.2 Nextcloud & WebDAV Entegrasyonu
 - **Resmî Mobil / Masaüstü Uygulaması:** Mobil ve masaüstü Nextcloud istemcileri ile tüm klasörlerinizi eşzamanlı tutabilirsiniz.
