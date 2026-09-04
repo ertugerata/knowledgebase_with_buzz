@@ -188,6 +188,8 @@ services:
     image: hermes-agent:latest
     container_name: hermes-agent
     restart: unless-stopped
+    stdin_open: true # docker run -i karşılığı
+    tty: true        # docker run -t karşılığı
     volumes:
       - ./hermes/mcp_config.json:/app/mcp_config.json
     environment:
