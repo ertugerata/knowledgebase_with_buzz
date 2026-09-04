@@ -17,12 +17,14 @@
     }
 }
 
-# Yerel HTTP erişimi (Port 80) - Sertifika uyarısı veya domain eşleşme hatası olmadan bağlantı
-http://localhost, http://127.0.0.1 {
+# Yerel HTTP erişimi (Port 80) - ChromeOS Crostini VM IP'leri (100.115.92.x), LAN IP'leri ve localhost/127.0.0.1 için
+http:// {
     import buzz_handlers
 }
 
 # Etki alanı (Domain) yapılandırması (Varsa Otomatik SSL / TLS)
+# Not: DOMAIN_NAME varsayılan olarak 'localhost' iken yukarısı çalışır.
+# Gerçek bir domain girildiğinde (ör. buzz.example.com) HTTPS/SSL otomatik devreye girer.
 {$DOMAIN_NAME:localhost} {
     import buzz_handlers
 }
