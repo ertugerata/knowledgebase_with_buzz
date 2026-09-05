@@ -192,6 +192,7 @@ services:
     tty: true        # docker run -t karşılığı
     volumes:
       - ./hermes/mcp_config.json:/app/mcp_config.json
+      - ./hermes/skills:/opt/hermes/skills/buzz
     environment:
       # OpenRouter Bulut Yapılandırması
       - LLM_PROVIDER=openrouter
